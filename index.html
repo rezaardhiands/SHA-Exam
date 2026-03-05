@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CBT Pro v7.8.3 - SHA EXAM</title>
+  <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
+    input { -webkit-user-select: text; user-select: text; }
+    #cheatOverlay { backdrop-filter: blur(12px); display: none; z-index: 9999; }
+    .locked-card { opacity: 0.5; filter: grayscale(1); pointer-events: none; border: 2px dashed red !important; }
+    .finished-card { opacity: 0.6; filter: sepia(1); pointer-events: none; border: 2px solid #10b981 !important; }
+    .admin-tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; }
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; position: fixed; width: 100%; }
+    #app { height: 100%; overflow-y: auto; }
+    iframe { width: 100%; height: 100%; border: none; background: white; }
+    @keyframes pulse-blue {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+    .pulse-effect { animation: pulse-blue 2s infinite; }
+  </style>
+ </head>
+ <body class="bg-slate-50 text-slate-900">
+  <div id="app" class="flex flex-col">
+   
+   <div id="loginPage" class="flex-1 flex items-center justify-center p-4 min-h-screen">
+    <div class="w-full max-w-md bg-white rounded-[40px] shadow-2xl p-8 border border-slate-100">
+      <div class="text-center mb-8">
+          <div class="w-20 h-20 bg-blue-600 rounded-[28px] mx-auto flex items-center justify-center shadow-2xl shadow-blue-200 mb-6">
+              <span class="text-white font-black text-3xl italic">SHA</span>
+          </div>
+          <h1 class="text-2xl font-black text-slate-800 uppercase">SHA EXAM</h1>
+          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">v7.8.3 2026</p>
+      </div>
+      <div class="flex mb-6 bg-slate-100 rounded-2xl p-1 text-sm font-bold">
+        <button id="tabSiswa" onclick="switchRole('siswa')" class="flex-1 py-3 bg-white text-blue-600 rounded-xl shadow-sm">SISWA</button> 
+        <button id="tabAdmin" onclick="switchRole('admin')" class="flex-1 py-3 text-slate-500">ADMIN</button>
+      </div>
+      <form onsubmit="doLogin(event)" class="space-y-4">
+        <input type="text" id="username" required class="w-full px-6 py-4 bg-slate-50 rounded-2xl outline-none border focus:ring-2 focus:ring-blue-500" placeholder="Username">
+        <input type="password" id="password" required class="w-full px-6 py-4 bg-slate-50 rounded-2xl outline-none border focus:ring-2 focus:ring-blue-500" placeholder="Password">
+        <button type="submit" id="btnLogin" class="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 uppercase tracking-widest">Masuk</button>
+      </form>
+    </div>
+   </div>
+
+   <div id="mapelListPage" class="hidden p-6 min-h-screen">
+     <div id="ruleModal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl border border-slate-100 text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full mx-auto flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 uppercase mb-4">PENTING!</h3>
+            <div class="text-left space-y-3 mb-6">
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 font-bold px-2 py-0.5 rounded-lg text-xs">1</span>
+                    <p class="text-xs font-bold text-slate-600">Dilarang keluar aplikasi (Home/Recent Apps).</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 font-bold px-2 py-0.5 rounded-lg text-xs">2</span>
+                    <p class="text-xs font-bold text-slate-600">Dilarang Split Screen atau Jendela Mengambang.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 font-bold px-2 py-0.5 rounded-lg text-xs">3</span>
+                    <p class="text-xs font-bold text-slate-600">Dilarang menekan Back atau keluar Fullscreen.</p>
+                </div>
+                <div class="bg-red-50 p-3 rounded-2xl">
+                    <p class="text-[10px] text-red-600 font-black uppercase text-center italic">⚠️ Pelanggaran > 2x = AKUN TERKUNCI</p>
+                </div>
+            </div>
+            <button onclick="closeRuleModal()" class="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 uppercase tracking-widest text-sm text-white">SAYA MENGERTI</button>
+        </div>
+     </div>
+
+     <div class="max-w-5xl mx-auto">
+       <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-[30px] shadow-sm border border-slate-100">
+           <div><p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Peserta:</p><h2 id="displayUser" class="text-xl font-black text-slate-800 uppercase">-</h2></div>
+           <button onclick="location.reload()" class="bg-red-50 text-red-600 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase">Logout</button>
+       </div>
+       <div id="mapelGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+     </div>
+   </div>
+
+   <div id="examPage" class="hidden fixed inset-0 z-[999] bg-white flex flex-col">
+    <header class="bg-blue-700 text-white p-3 flex justify-between items-center shadow-xl">
+      <button onclick="selesaikanUjian()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg text-white">Selesai Ujian</button>
+      <div class="text-center">
+          <h2 id="headerMapel" class="text-[10px] font-black uppercase tracking-widest opacity-80">...</h2>
+          <p id="cheatDisplay" class="text-[9px] bg-red-600 px-3 py-1 rounded-full font-black uppercase mt-0.5">Pelanggaran: 0/2</p>
+      </div>
+      <div id="timer" class="bg-black/20 px-3 py-2 rounded-xl font-mono text-xs font-bold border border-white/10">00:00:00</div>
+    </header>
+    <div class="flex-1 relative overflow-hidden bg-slate-100">
+        <div id="cheatOverlay" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-6 text-center">
+            <h2 class="text-2xl font-black text-red-600 mb-2">LAYAR TERKUNCI!</h2>
+            <button onclick="requestFullscreen()" class="bg-blue-600 text-white px-12 py-5 rounded-[30px] font-black uppercase tracking-widest">Masuk Kembali</button>
+        </div>
+        <div id="examFrameArea" class="h-full w-full"></div>
+    </div>
+   </div>
+
+   <div id="adminPage" class="hidden flex-1 flex flex-col min-h-screen">
+    <header class="bg-slate-900 text-white p-4 flex justify-between items-center">
+      <h1 class="font-black text-[10px] uppercase tracking-[0.2em] px-4">Admin Dashboard</h1>
+      <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Logout</button>
+    </header>
+    <div class="bg-white border-b flex px-6 shadow-sm overflow-x-auto">
+        <button id="btnTab1" onclick="switchAdminTab('ujian')" class="px-6 py-4 font-bold text-sm admin-tab-active uppercase italic">Jadwal</button>
+        <button id="btnTab2" onclick="switchAdminTab('pelanggaran')" class="px-6 py-4 font-bold text-sm text-slate-500 uppercase italic">Pelanggaran</button>
+    </div>
+    <main class="flex-1 p-6 overflow-auto bg-slate-50">
+      <div id="sectionUjian">
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 font-black text-slate-400 uppercase tracking-widest">
+              <tr><th class="p-5 border-b">Mapel</th><th class="p-5 border-b">ID</th><th class="p-5 border-b">Batas Waktu</th></tr>
+            </thead>
+            <tbody id="examTableBody" class="font-bold divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="sectionPelanggaran" class="hidden">
+        <div class="flex justify-between items-center mb-4 px-2">
+            <h3 class="font-black text-[10px] uppercase text-slate-400 tracking-widest">Live Monitoring</h3>
+            <span class="text-[9px] font-bold text-blue-500 animate-pulse uppercase">Auto-Sync Active</span>
+        </div>
+        <div id="studentListContainer" class="space-y-3"></div>
+      </div>
+    </main>
+   </div>
+  </div>
+
+  <script>
+    const CLOUD_API = "https://script.google.com/macros/s/AKfycbz17ovTsnNjLAlQPNAU4BqBtrazjH1dk-b1SldEBy3PRPrCqeePKwBytnsHPjMwcA4R/exec"; 
+    
+    let exams = []; 
+    let accounts = []; 
+    let role = 'siswa'; 
+    let currentUser = ""; 
+    let currentMapelId = null; 
+    let timerRef = null; 
+    let adminInterval = null; 
+    const MAX_PELANGGARAN = 2; 
+
+    let isDetectionReady = false; 
+    let violationTimeout = null; // VARIABEL UNTUK JEDA TOLERANSI
+
+    function parseTargetDate(timeStr) {
+        if (!timeStr) return new Date().getTime();
+        if (timeStr.includes(':') && !timeStr.includes('-') && !timeStr.includes('/')) {
+            const [h, m] = timeStr.split(':');
+            const d = new Date();
+            d.setHours(h, m, 0, 0);
+            return d.getTime();
+        }
+        return new Date(timeStr.replace(/-/g, "/")).getTime();
+    }
+
+    async function fetchCloudData() {
+        try {
+            const response = await fetch(CLOUD_API);
+            const data = await response.json();
+            accounts = data.siswa; 
+            exams = data.ujian;
+            
+            if (currentUser !== "" && role === 'siswa') {
+                const myAccount = accounts.find(a => a.user.toString().toLowerCase() === currentUser.toLowerCase());
+                if (myAccount && myAccount.skor !== undefined) {
+                    const scoreData = parseCloudScore(myAccount.skor);
+                    exams.forEach(ex => {
+                        const cloudVal = scoreData[ex.id] || 0;
+                        localStorage.setItem(`cheat_${currentUser}_${ex.id}`, cloudVal);
+                        if (cloudVal === 0) {
+                            localStorage.removeItem(`session_${currentUser}_${ex.id}`);
+                        }
+                    });
+                }
+            }
+            renderUI(); 
+        } catch (err) { console.error("Cloud Sync Error:", err); }
+    }
+
+    function parseCloudScore(scoreStr) {
+        const obj = {};
+        if(!scoreStr) return obj;
+        scoreStr.toString().split(',').forEach(item => {
+            const [id, val] = item.split(':');
+            if(id) obj[id] = parseInt(val || 0);
+        });
+        return obj;
+    }
+
+    async function laporPelanggaranKeCloud(user, mapelId, skorBaru) {
+        const acc = accounts.find(a => a.user.toString().toLowerCase() === user.toLowerCase());
+        if(!acc) return;
+        
+        const scoreObj = parseCloudScore(acc.skor);
+        scoreObj[mapelId] = skorBaru;
+        const newScoreStr = Object.entries(scoreObj)
+            .filter(([id]) => id !== "")
+            .map(([id, val]) => `${id}:${val}`)
+            .join(',');
+
+        try {
+            await fetch(CLOUD_API, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    'username': user,
+                    'newSkor': newScoreStr
+                })
+            });
+        } catch (e) { console.error("Cloud Report Failed:", e); }
+    }
+
+    async function resetPelanggaran(user, mapelId) {
+        if(!confirm(`Reset pelanggaran untuk ${user}?`)) return;
+        const acc = accounts.find(a => a.user.toString().toLowerCase() === user.toLowerCase());
+        if(!acc) return;
+        const scoreObj = parseCloudScore(acc.skor);
+        delete scoreObj[mapelId];
+        const newScoreStr = Object.entries(scoreObj).filter(([id]) => id !== "").map(([id, val]) => `${id}:${val}`).join(',');
+        try {
+            await fetch(CLOUD_API, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ 'username': user, 'newSkor': newScoreStr })
+            });
+            alert("Berhasil direset!");
+            fetchCloudData();
+        } catch (e) { alert("Gagal mereset ke cloud."); }
+    }
+
+    function renderUI() {
+      const grid = document.getElementById('mapelGrid');
+      if(grid) {
+          let htmlContent = `<div onclick="window.open('https://forms.gle/A1otJRzY2wAj9Xba6', '_blank')" class="pulse-effect bg-blue-600 p-8 rounded-[40px] shadow-lg cursor-pointer active:scale-95 border-4 border-blue-200"><h3 class="font-black text-white uppercase italic">PRESENSI HARIAN</h3></div>`;
+          htmlContent += exams.map(e => {
+              const localScore = parseInt(localStorage.getItem(`cheat_${currentUser}_${e.id}`) || '0');
+              const isFinished = localStorage.getItem(`done_${currentUser}_${e.id}`) === "true";
+              const now = new Date().getTime();
+              const target = parseTargetDate(e.endTime);
+              const isExpired = now > target;
+              let cardClass = "bg-white p-8 rounded-[40px] shadow-sm relative border transition-all cursor-pointer";
+              if (isFinished) cardClass += " finished-card";
+              else if (localScore >= MAX_PELANGGARAN || isExpired) cardClass += " locked-card";
+              return `<div onclick="${(isFinished || localScore >= MAX_PELANGGARAN || isExpired) ? '' : `pilihUjian('${e.id}')`}" class="${cardClass}"><div class="flex justify-between items-start"><h3 class="font-black text-slate-800 uppercase">${e.mapel}</h3></div><div class="mt-4 pt-4 border-t border-slate-50"><p class="text-[8px] font-black text-slate-400 uppercase italic">Deadline: ${e.endTime}</p><p class="text-[9px] font-black text-blue-600 mt-1 uppercase">Pelanggaran: ${localScore}/${MAX_PELANGGARAN}</p></div></div>`;
+          }).join('');
+          grid.innerHTML = htmlContent;
+      }
+      document.getElementById('examTableBody').innerHTML = exams.map(e => `<tr><td class="p-5 uppercase font-black">${e.mapel}</td><td class="p-5 font-mono text-slate-400">${e.id}</td><td class="p-5 text-blue-600 font-mono">${e.endTime}</td></tr>`).join('');
+      const sContainer = document.getElementById('studentListContainer');
+      if (sContainer) {
+          let adminHTML = "";
+          accounts.forEach(acc => {
+              const scoreObj = parseCloudScore(acc.skor);
+              Object.entries(scoreObj).forEach(([mId, val]) => {
+                  if(val > 0) {
+                      const mName = exams.find(x => x.id == mId)?.mapel || "Unknown";
+                      adminHTML += `<div class="bg-white p-5 rounded-[25px] border border-slate-200 flex justify-between items-center shadow-sm mb-3"><div><p class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">${acc.user}</p><p class="font-bold text-slate-800 text-sm">${mName}</p><p class="text-[9px] font-black text-red-500 mt-1 uppercase">🚨 ${val} Pelanggaran</p></div><button onclick="resetPelanggaran('${acc.user}', '${mId}')" class="bg-green-500 text-white px-5 py-2.5 rounded-xl font-black text-[9px] uppercase shadow-lg shadow-green-200">Reset</button></div>`;
+                  }
+              });
+          });
+          sContainer.innerHTML = adminHTML || '<div class="text-center py-20 text-slate-300 font-black uppercase text-xs tracking-widest">Tidak ada pelanggaran</div>';
+      }
+    }
+
+    function closeRuleModal() {
+        document.getElementById('ruleModal').classList.add('hidden');
+    }
+
+    async function pilihUjian(id) {
+      const e = exams.find(x => x.id === id);
+      const localScore = parseInt(localStorage.getItem(`cheat_${currentUser}_${id}`) || '0');
+      const now = new Date().getTime();
+      const target = parseTargetDate(e.endTime);
+      if(now > target) return alert("WAKTU HABIS.");
+      if(localScore >= MAX_PELANGGARAN) return alert(`TERKUNCI: Hubungi Admin.`);
+      localStorage.removeItem(`session_${currentUser}_${id}`);
+      currentMapelId = id;
+      localStorage.setItem(`session_${currentUser}_${id}`, "active");
+      isDetectionReady = false; 
+      document.getElementById('headerMapel').textContent = e.mapel;
+      document.getElementById('cheatDisplay').textContent = `Pelanggaran: ${localScore}/${MAX_PELANGGARAN}`;
+      document.getElementById('examFrameArea').innerHTML = `<iframe src="${e.mLink}" sandbox="allow-forms allow-scripts allow-same-origin"></iframe>`;
+      showPage('exam');
+      requestFullscreen(); 
+      startTimer(e.endTime);
+      setTimeout(() => { isDetectionReady = true; }, 10000);
+    }
+
+    function selesaikanUjian() {
+        if(confirm("Yakin selesai? Ujian tidak akan bisa dibuka lagi.")) {
+            localStorage.removeItem(`session_${currentUser}_${currentMapelId}`);
+            localStorage.setItem(`done_${currentUser}_${currentMapelId}`, "true");
+            location.reload();
+        }
+    }
+
+    function initCheatDetector() {
+        // minimize app atau pindah tab
+        document.addEventListener("visibilitychange", async () => {
+            const isExam = !document.getElementById('examPage').classList.contains('hidden');
+            if (document.visibilityState === "hidden" && isExam) await handleViolationAction();
+        });
+        
+        // layar hilang fokus (dengan Jeda Toleransi 1 Detik)
+        window.addEventListener("blur", async () => {
+            const isExam = !document.getElementById('examPage').classList.contains('hidden');
+            if (isExam) {
+                // Beri waktu 3 detik sebelum menghukum
+                violationTimeout = setTimeout(async () => {
+                    await handleViolationAction();
+                }, 3000);
+            }
+        });
+
+        // Jika layar kembali fokus sebelum 1 detik (misal: keyboard sudah muncul)
+        window.addEventListener("focus", () => {
+            if (violationTimeout) {
+                clearTimeout(violationTimeout);
+                violationTimeout = null;
+                console.log("Fokus kembali: Pelanggaran dibatalkan.");
+            }
+        });
+
+        // exit fullscreen
+        document.addEventListener("fullscreenchange", () => {
+            const noFS = !document.fullscreenElement && !document.webkitFullscreenElement;
+            const isExam = !document.getElementById('examPage').classList.contains('hidden');
+            document.getElementById('cheatOverlay').style.display = (isExam && noFS) ? 'flex' : 'none';
+        });
+    }
+
+    async function handleViolationAction() {
+        if (!isDetectionReady) return; 
+        let currentScore = parseInt(localStorage.getItem(`cheat_${currentUser}_${currentMapelId}`) || '0');
+        let newScore = currentScore + 1;
+        localStorage.setItem(`cheat_${currentUser}_${currentMapelId}`, newScore);
+        document.getElementById('cheatDisplay').textContent = `Pelanggaran: ${newScore}/${MAX_PELANGGARAN}`;
+        await laporPelanggaranKeCloud(currentUser, currentMapelId, newScore);
+        if (newScore < MAX_PELANGGARAN) {
+            alert(`PELANGGARAN TERDETEKSI!\nJangan keluar aplikasi!\nSkor: ${newScore}/${MAX_PELANGGARAN}`);
+            location.reload(); 
+        } else {
+            alert("AKUN TERKUNCI: Batas pelanggaran tercapai.");
+            location.reload(); 
+        }
+    }
+
+    function startTimer(end) {
+        if (timerRef) clearInterval(timerRef);
+        timerRef = setInterval(() => {
+            const now = new Date().getTime();
+            const target = parseTargetDate(end);
+            const diff = target - now;
+            if (diff <= 0) { clearInterval(timerRef); location.reload(); } 
+            else {
+                const hh = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2,'0');
+                const mm = Math.floor((diff / (1000 * 60)) % 60).toString().padStart(2,'0');
+                const ss = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
+                document.getElementById('timer').textContent = `${hh}:${mm}:${ss}`;
+            }
+        }, 1000);
+    }
+
+    function doLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      if(role === 'admin') {
+        if(u === 'admin' && p === 'admin123') { 
+            showPage('admin'); 
+            fetchCloudData(); 
+            adminInterval = setInterval(fetchCloudData, 10000); 
+        } else alert('Admin Gagal!');
+      } else {
+        const found = accounts.find(a => a.user.toString().toLowerCase() === u.toLowerCase() && a.pass.toString() === p);
+        if(found) { 
+            currentUser = u; 
+            document.getElementById('displayUser').textContent = u; 
+            showPage('mapelList'); 
+            fetchCloudData(); 
+            document.getElementById('ruleModal').classList.remove('hidden'); 
+        } else alert("Username/Password Salah!");
+      }
+    }
+
+    function switchRole(r) {
+      role = r;
+      document.getElementById('tabSiswa').className = r === 'siswa' ? 'flex-1 py-3 bg-white text-blue-600 rounded-xl shadow-sm' : 'flex-1 py-3 text-slate-500';
+      document.getElementById('tabAdmin').className = r === 'admin' ? 'flex-1 py-3 bg-white text-blue-600 rounded-xl shadow-sm' : 'flex-1 py-3 text-slate-500';
+    }
+
+    function showPage(id) {
+      ['login','admin','exam','mapelList'].forEach(p => document.getElementById(p + 'Page').classList.add('hidden'));
+      document.getElementById(id + 'Page').classList.remove('hidden');
+      if(id !== 'admin' && adminInterval) clearInterval(adminInterval);
+    }
+
+    function switchAdminTab(tab) {
+        document.getElementById('sectionUjian').classList.toggle('hidden', tab !== 'ujian');
+        document.getElementById('sectionPelanggaran').classList.toggle('hidden', tab !== 'pelanggaran');
+        document.getElementById('btnTab1').className = tab === 'ujian' ? 'px-6 py-4 font-bold text-sm admin-tab-active uppercase italic' : 'px-6 py-4 font-bold text-sm text-slate-500 uppercase italic';
+        document.getElementById('btnTab2').className = tab === 'pelanggaran' ? 'px-6 py-4 font-bold text-sm admin-tab-active uppercase italic' : 'px-6 py-4 font-bold text-sm text-slate-500 uppercase italic';
+    }
+
+    function requestFullscreen() {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }
+
+    window.onload = () => { fetchCloudData(); initCheatDetector(); };
+  </script>
+ </body>
+</html>
