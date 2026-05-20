@@ -29,28 +29,17 @@
         let usernameLogin = "";
 
         // FUNGSI LOGIN MENGGUNAKAN FETCH (Wajib untuk GitHub/APK)
-        function login() {
-            let u = document.getElementById('u').value;
-            let p = document.getElementById('p').value;
-            
-            fetch(WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify({ type: "login", username: u, password: p })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    usernameLogin = u;
-                    alert("Login Berhasil!");
-                    // Pindah ke halaman pilih ujian...
-                } else {
-                    alert("Login Gagal!");
-                }
-            })
-            .catch(err => alert("Error koneksi: " + err));
-        }
-        
-        // Gunakan pola fetch yang sama untuk fungsi lainnya (mulaiUjian, handleSubmit)
-    </script>
-</body>
-</html>
+       function login() {
+    let u = document.getElementById('u').value;
+    let p = document.getElementById('p').value;
+    
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "cors", // Pastikan mode cors
+        headers: { "Content-Type": "text/plain" }, 
+        body: JSON.stringify({ type: "login", username: u, password: p })
+    })
+    .then(res => res.json())
+    .then(data => { /* proses data */ })
+    .catch(err => console.log(err));
+}
