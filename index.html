@@ -8,7 +8,8 @@
     <style>
         .page { display: none; }
         .page.active { display: block; }
-        .opsi-container { cursor: pointer; border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 10px; }
+        .opsi-container { cursor: pointer; border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 10px; transition: 0.3s; }
+        .opsi-container:hover { background: #f8f9fa; }
         .selected { background: #d1e7dd; border-color: #0f5132; }
     </style>
 </head>
@@ -18,7 +19,7 @@
 
     <div id="loginPage" class="page active container mt-5">
         <div class="card p-4 mx-auto" style="max-width: 400px;">
-            <h4>Login Siswa</h4>
+            <h4 class="text-center">Login Siswa</h4>
             <input id="u" class="form-control mb-2" placeholder="Username">
             <input id="p" class="form-control mb-2" type="password" placeholder="Password">
             <button class="btn btn-primary w-100" onclick="login()">MASUK</button>
@@ -28,48 +29,54 @@
     <script>
         let usernameLogin = "";
 
-        // Fungsi Helper untuk fetch ke Google Apps Script
-        async function postData(data) {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                mode: "no-cors", // Penting untuk bypass CORS di GAS
-                body: JSON.stringify(data)
-            });
-            return response;
-        }
-
+        // FUNGSI LOGIN
         function login() {
             let u = document.getElementById('u').value;
             let p = document.getElementById('p').value;
-            
-            // Contoh pengiriman data ke Apps Script
+            const btn = document.querySelector('#loginPage button');
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({ type: "login", username: u, password: p })
             })
             .then(res => res.json())
             .then(res => {
+                btn.innerText = "MASUK";
+                btn.disabled = false;
                 if(res.status === "success") {
                     usernameLogin = u;
-                    alert("Berhasil Login!");
+                    alert("Berhasil Login! Selamat mengerjakan.");
+                    // Tambahkan logika pindah ke halaman ujian di sini
                 } else {
-                    alert("Login Gagal!");
+                    alert("Login Gagal: Username/Password salah.");
                 }
+            })
+            .catch(err => {
+                btn.innerText = "MASUK";
+                btn.disabled = false;
+                alert("Error: Tidak dapat terhubung ke server.");
             });
         }
 
         // --- CHEAT DETECTOR ---
         document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                alert("Peringatan! Anda keluar dari halaman ujian.");
+            if (document.hidden && usernameLogin !== "") {
+                alert("PELANGGARAN: Anda terdeteksi keluar dari halaman ujian!");
+                // Kirim log tanpa menunggu balasan (no-cors)
                 fetch(API_URL, {
                     method: "POST",
+                    mode: "no-cors",
                     body: JSON.stringify({ type: "log", username: usernameLogin, pelanggaran: "Keluar Tab" })
                 });
             }
         });
 
+        // Mencegah Copy, Paste, Klik Kanan
         document.addEventListener("copy", (e) => e.preventDefault());
+        document.addEventListener("cut", (e) => e.preventDefault());
+        document.addEventListener("paste", (e) => e.preventDefault());
         document.addEventListener("contextmenu", (e) => e.preventDefault());
     </script>
 </body>
