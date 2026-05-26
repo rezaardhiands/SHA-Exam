@@ -103,7 +103,7 @@
     <div id="ujianPage" class="page container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-white rounded shadow-sm">
             <span id="namaPesertaUjian" class="fw-bold text-secondary">Siswa</span>
-            <div id="statusPelanggaranBox" class="badge bg-success cheat-counter-badge">
+            <div id="statusPelorg" class="badge bg-success cheat-counter-badge" id="statusPelanggaranBox">
                 Pelanggaran: 0 / 2
             </div>
         </div>
@@ -135,7 +135,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const DEPLOY_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBRqOjV-UVOxpowQWjI8CASdazcIXMwUpAAdBvjlgRxJ1J83hj_6XjIFRfj5kfpb__Bw/exec"; 
+        const DEPLOY_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx79KoPf2FJq9VI2ofk5FJLLr2FuLuJMmcII6sbS3UF4Xt9h_Apob63WNIv4prw80N1/exec"; 
 
         let currentIdx = 0, bankSoal = [], usernameLogin = "", passwordLogin = "", namaSiswaAsli = "";
         let cheatCount = 0; 
@@ -144,6 +144,7 @@
         let bsCheatModal = null; 
         let violationTimeout = null; 
         let tinggiLayarAsli = 0;
+        let statusKioskModeActive = false; // Flag internal pembantu
 
         function aktifkanCheatDetector() {
             bsCheatModal = new bootstrap.Modal(document.getElementById('cheatModal'));
@@ -192,8 +193,9 @@
                         detikLuarFokus = 0; 
                     }
 
-                    const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-                    const isLayarBerubah = tinggiLayarAsli > 0 && (window.innerHeight < tinggiLayarAsli);
+                    // PENYESUAIAN KODULAR: WebView APK menganggap internal Fullscreen selalu false, maka kita berikan toleransi statusKioskModeActive
+                    const isFullscreen = statusKioskModeActive || document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+                    const isLayarBerubah = tinggiLayarAsli > 0 && (window.innerHeight < (tinggiLayarAsli - 30)); // Beri toleransi margin 30px render APK
 
                     if (!isFullscreen || isLayarBerubah) {
                         if (violationTimeout) clearTimeout(violationTimeout);
@@ -211,13 +213,14 @@
         function handleFullscreenExitChange() {
             const isExam = document.getElementById('ujianPage').classList.contains('active');
             if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement && isExam) {
-                if (!isProcessingSubmit) {
+                if (!isProcessingSubmit && !statusKioskModeActive) { // Ditambahkan bypass toleransi APK
                     handleViolation("Keluar dari Mode Layar Penuh (Fullscreen)!");
                 }
             }
         }
 
         function requestFullscreenSistem() {
+            statusKioskModeActive = true; // Nyalakan status pengaman untuk lingkungan APK
             const docElm = document.documentElement;
             if (docElm.requestFullscreen) { docElm.requestFullscreen(); } 
             else if (docElm.mozRequestFullScreen) { docElm.mozRequestFullScreen(); } 
@@ -226,6 +229,7 @@
         }
 
         function exitFullscreenSistem() {
+            statusKioskModeActive = false; // Matikan status pengaman
             if (document.exitFullscreen) { document.exitFullscreen(); } 
             else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); } 
             else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } 
@@ -240,7 +244,8 @@
             isProcessingSubmit = true; 
             cheatCount++;
             
-            const statusBox = document.getElementById('statusPelanggaranBox');
+            // Perbaikan pencarian ID ganda Bootstrap pada elemen HTML Anda
+            const statusBox = document.getElementById('statusPelanggaranBox') || document.getElementById('statusPelorg');
             if (statusBox) {
                 statusBox.innerText = `Pelanggaran: ${cheatCount} / ${maxViolations}`;
                 statusBox.className = "badge bg-danger cheat-counter-badge";
@@ -360,9 +365,10 @@
 
             requestFullscreenSistem();
             
+            // PENYESUAIAN KODULAR: Berikan jeda lebih lama (1.2 detik) agar tinggi asli layar terbaca akurat sesudah keyboard tertutup sepenuhnya
             setTimeout(function() {
                 tinggiLayarAsli = window.innerHeight;
-            }, 500);
+            }, 1200);
 
             const callbackName = "handleDataSoal_" + Math.floor(Math.random() * 100000);
             window[callbackName] = function(res) {
@@ -395,7 +401,7 @@
                     }
                     
                     cheatCount = 0;
-                    const statusBox = document.getElementById('statusPelanggaranBox');
+                    const statusBox = document.getElementById('statusPelanggaranBox') || document.getElementById('statusPelorg');
                     if (statusBox) {
                         statusBox.innerText = `Pelanggaran: 0 / ${maxViolations}`;
                         statusBox.className = "badge bg-success cheat-counter-badge";
@@ -408,11 +414,10 @@
                     pindahHalaman('ujianPage');
                     renderSoal();
 
-                    // PERBAIKAN KHUSUS KODULAR: Beri jeda 2.5 detik sebelum aktifkan detektor
-                    // Ini menghindari crash fokus akibat penutupan keyboard HP secara tiba-tiba
+                    // PENYESUAIAN KHUSUS KODULAR: Menggunakan jeda 3 detik penuh demi stabilitas WebView APK sebelum fungsi melanggar aktif
                     setTimeout(function() {
                         aktifkanCheatDetector();
-                    }, 2500);
+                    }, 3000);
 
                     btn.innerText = "MULAI UJIAN";
                     btn.disabled = false;
